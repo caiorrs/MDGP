@@ -7,29 +7,31 @@ if sys.version_info[0] < 3:
 
 
 def main(args):
-    filename = (args.file[0].name)
-    seed = (args.seed)
-    shouldMeasureTime = (args.time)
+    filename = args.file[0].name
+    seed = args.seed
+    shouldMeasureTime = args.time
 
-    forest = []
+    kGraph = []
 
     with open(filename, 'r') as f:
         # M - number of elements - number of nodes
         # G - number of groups - edges
         # GT - group type "ss" or "ds"
-        # LL - lower limit
-        # UL - upper limit
-        first_line = f.readline().strip()
+        first_line = f.readline().split()
         M, G = first_line[:2]
-        GT = first_line[3]
+        GT = first_line[2]
         limits = first_line[3:]
         for line in f:
             e1, e2, d = line.split()
             e1, e2, d = int(e1), int(e2), float(d)
-            forest.append([e1, e2, d])
+            kGraph.append([[e1, e2], d])
 
-    print("forest")
-    pprint(forest)
+    print("kGraph")
+    pprint(kGraph)
+    # valores minimos para cada grupo
+    a = limits[::2]
+    # valores maximos para cada grupo
+    b = limits[1::2]
 
 
 if __name__ == "__main__":
