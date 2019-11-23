@@ -17,27 +17,28 @@ set GROUPS := 1..G;
 
 set ARCS within(INDIVIDUALS cross INDIVIDUALS);
 param difference{ARCS};
-display difference;
+/*display difference;*/
 
 /*
 param DIFFERENCE := {ARCS}
 */
 
+var d{(i,j) in ARCS} >= 0;
+var y{(i,j) in ARCS, g in G};
+
 /*
-var x{i in ARCS, for g : m}
+maximize diversity: sum{g in G} sum{i in VERTICES} sum{j in VERTICES && i <> j} d[i,j]*y[i,j,g]
 
-maximize diversity: sum{g=1 to m} sum{i in VERTICES} sum{j in VERTICES and i <> j} d(i,j)*y(i,j,g)
-
-s.t. A: sum{g=1 to m} x(i,g) = 1
-s.t. B: sum{i in VERTICES} x(i,g) >= a(g)
-s.t. B: sum{i in VERTICES} x(i,g) <= b(g)
-s.t. B: x(i,g) + x(j,g) - 1 <= y(i,j,g)
-s.t. B: sum{j in VERTICES and i <> j} y(i,j,g) >= (a(g) - 1) * x(j,g)
-s.t. B: sum{j in VERTICES and i <> j} y(i,j,g) <= (b(g) - 1) * x(j,g)
-s.t. B: x(i,g) >= 0
-s.t. B: x(i,g) <= 1
-s.t. B: y(i,j,g) >= 0
-s.t. B: y(i,j,g) <= 1
+s.t. A: sum{g=1 to m} x[i,g] = 1
+s.t. B: sum{i in VERTICES} x[i,g] >= a[g]
+s.t. B: sum{i in VERTICES} x[i,g] <= b[g]
+s.t. B: x[i,g] + x[j,g] - 1 <= y[i,j,g]
+s.t. B: sum{j in VERTICES and i <> j} y[i,j,g] >= (a(g) - 1) * x(j,g)
+s.t. B: sum{j in VERTICES and i <> j} y[i,j,g] <= (b(g) - 1) * x(j,g)
+s.t. B: x[i,g] >= 0
+s.t. B: x[i,g] <= 1
+s.t. B: y[i,j,g] >= 0
+s.t. B: y[i,j,g] <= 1
 */
 
 end;
