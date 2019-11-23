@@ -2,11 +2,10 @@ param M := 10;
 param G := 2;
 param TYPE := 'ss';
 
-/*
-param: LIMITS := 
+
+/*param: LIMITS := 
 5 5 5 5
-;
-*/
+;*/
 
 param: ARCS: difference :=
 0 1 169.099

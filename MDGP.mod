@@ -2,30 +2,26 @@
 
 /* numero de individuos */
 param M integer > 0;
+
 /* numero de grupos */
 param G integer > 0;
+
 /* tipo de grupo - ss/ds - same size/different size */
 param TYPE symbolic;
 
-param LIMITS;
+set LIMITS;
+display LIMITS;
 
-/*param ARCS;*/
-
-set INDIVIDUALS := 1..M;
+set INDIVIDUALS := 0..(M-1);
 set GROUPS := 1..G;
 
-display INDIVIDUALS;
-display GROUPS;
-
-/*display 'individuals ', INDIVIDUALS;*/
-
-/*set ARCS within (INDIVIDUALS cross INDIVIDUALS);
-display ARCS;*/
+set ARCS within(INDIVIDUALS cross INDIVIDUALS);
+param difference{ARCS};
+display difference;
 
 /*
-param DIFFERENCE := {ARCS}*/
-
-
+param DIFFERENCE := {ARCS}
+*/
 
 /*
 var x{i in ARCS, for g : m}
@@ -43,3 +39,5 @@ s.t. B: x(i,g) <= 1
 s.t. B: y(i,j,g) >= 0
 s.t. B: y(i,j,g) <= 1
 */
+
+end;
