@@ -6,20 +6,26 @@ import random
 import time
 import math
 
-def geneticAlgorithm(self, weights, numberOfCandidates, theSeed, theIterationNumber):
-    print("Genetic Algorithm")
-    state_current = weights
-    initialPopulation = []
-    print("Initial score")
-    #print(self.run_episode(state_current))
-    #USAR DISTANCIA EUCLIDIANA PARA CALCULAR fitness
-    #dist = numpy.linalg.norm(a-b)
+def chunks(l, n):
+    for i in range(0, len(l), n):
+        yield l[i:i+n]
 
+def geneticAlgorithm( entry, numberOfCandidates, numberOfGroups, theSeed, theIterationNumber):
+    print("Genetic Algorithm")
+    state_current = entry
+    initialPopulation = state_current
+
+    #USAR DISTANCIA EUCLIDIANA PARA CALCULAR fitness?
+    #dist = numpy.linalg.norm(a-b)
+    individualsPerGroup = numberOfCandidates * numberOfGroups
+    print(individualsPerGroup)
     numpy.random.seed(theSeed)
-    initialPopulation = numpy.random.uniform(-10,10,(numberOfCandidates,len(state_current)))
-    for i in range(len(initialPopulation)):
-        for j in range(len(initialPopulation[i])):
-            initialPopulation[i][j]+=state_current[j]
+    numpy.random.shuffle(initialPopulation)
+    #initialPopulation = numpy.array_split(initialPopulation,individualsPerGroup)
+    initialPopulation = list(chunks(initialPopulation, individualsPerGroup))
+    print("POP INICIAL")
+    print(initialPopulation)
+
 
 
     iterator = theIterationNumber
@@ -27,25 +33,30 @@ def geneticAlgorithm(self, weights, numberOfCandidates, theSeed, theIterationNum
         finalDescendants = []
         fitness = []
         for i in initialPopulation:
-            fitness.append(i[2])
+            fitValue = 0
+            for j in i:
+                fitValue+=j[2]
+            fitness.append(fitValue)
+        print("ESSE E O FITNESS")
+        print(fitness)
 
-        chosenPopulation = self.tournamentChoice(initialPopulation, fitness, numberOfCandidates/2)
-        descendants = self.matching(chosenPopulation,numberOfCandidates/2)
+        chosenPopulation = tournamentChoice(initialPopulation, fitness, numberOfCandidates/2)
+        descendants = matching(chosenPopulation,numberOfCandidates/2)
 
-        finalDescendants = self.mutateGenes(descendants)
+        finalDescendants = mutateGenes(descendants)
         initialPopulation = finalDescendants
         maxValue = max(fitness)
         for i in range(len(fitness)):
             if(maxValue == fitness[i]):
                 bestChoice = i
 
-        print("Mid score")
+        #print("Mid score")
         #print(self.run_episode(finalDescendants[bestChoice]))
         iterator-=1
 
     fitness = []
     for i in finalDescendants:
-        fitness.append(self.run_episode(i))
+        fitness.append(i[2])
     maxValue = max(fitness)
     for i in range(len(fitness)):
         if(maxValue == fitness[i]):
@@ -55,7 +66,7 @@ def geneticAlgorithm(self, weights, numberOfCandidates, theSeed, theIterationNum
     return finalDescendants[bestChoice]
 
 
-def mutateGenes(self, candidates):
+def mutateGenes( candidates):
     for i in range(len(candidates)):
         for j in range(len(candidates[i])):
             if(numpy.random.randint(100) == 1):
@@ -63,7 +74,7 @@ def mutateGenes(self, candidates):
 
     return candidates
 
-def matching(self, chosen, numberOfParts):
+def matching( chosen, numberOfParts):
     parts = []
     dividedParts = []
     parts = numpy.array_split(chosen,numberOfParts)
@@ -78,12 +89,12 @@ def matching(self, chosen, numberOfParts):
     descendants = []
     for i in range(0,limit,2):
         if ((dplimit - i) == 1):
-            descendants.extend( self.crossover(dividedParts[i],dividedParts[i]))
+            descendants.extend( crossover(dividedParts[i],dividedParts[i]))
         else:
-            descendants.extend( self.crossover(dividedParts[i],dividedParts[i+1]))
+            descendants.extend( crossover(dividedParts[i],dividedParts[i+1]))
     return descendants
 
-def crossover(self, candidate1, candidate2):
+def crossover( candidate1, candidate2):
     c1 = numpy.array_split(candidate1,2)
     c2 = numpy.array_split(candidate2,2)
     c3 = numpy.array_split(candidate1,4)
@@ -112,7 +123,7 @@ def crossover(self, candidate1, candidate2):
 
     return finalArray
 
-def tournamentChoice(self, candidates, fitness, limit):
+def tournamentChoice( candidates, fitness, limit):
     localFitness = fitness
     chosenOnes=[]
     round=0
@@ -148,6 +159,7 @@ if sys.version_info[0] < 3:
 def main(args):
     filename = (args.file[0].name)
     popSize = (args.population)
+    groupsNum = (args.groups)
     seed = (args.seed)
     shouldMeasureTime = (args.time)
 
@@ -159,8 +171,8 @@ def main(args):
         # GT - group type "ss" or "ds"
         # LL - lower limit
         # UL - upper limit
-        first_line = f.readline().strip()
-        M, G = first_line[:2]
+        first_line = f.readline().split()
+        M ,G = first_line[:2]
         GT = first_line[3]
         limits = first_line[3:]
         for line in f:
@@ -170,13 +182,17 @@ def main(args):
 
     print("forest")
     pprint(forest)
-    self.geneticAlgorithm(forest,popSize,seed,shouldMeasureTime)
+    if(popSize * groupsNum > int(M)):
+        print("Valor de indivíduos ou grupos inválido")
+        quit()
+
+    geneticAlgorithm(forest,popSize,groupsNum,seed,shouldMeasureTime)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description='Uses Genetic Algorithm to find solution for MDGP.',
-        usage='MGDP.py [-h] [--file myinstance.txt] [--population n] [--seed 1234ABCD] [--time n]')
+        usage='MGDP.py [-h] [--file myinstance.txt] [--population n] [--groups n] [--seed 1234ABCD] [--time n]')
 
     parser.add_argument('-f', '--file', type=open, nargs=1,
                         help='a file containing the instance',
@@ -184,6 +200,8 @@ if __name__ == "__main__":
     parser.add_argument(
         '-p', '--population',type=int, help='Population Size')
 
+    parser.add_argument(
+        '-g', '--groups',type=int, help='Number of groups')
     parser.add_argument(
         '-s', '--seed', type=int, help='Seed to generate random numbers')
 
@@ -195,6 +213,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     print(args.file[0].name)
     print(args.population)
+    print(args.groups)
     print(args.seed)
     print(args.time)
 
