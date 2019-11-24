@@ -6,12 +6,14 @@ import random
 import time
 import math
 
-def geneticAlgorithm(self, weights, numberOfCandidates, theSeed):
+def geneticAlgorithm(self, weights, numberOfCandidates, theSeed, theIterationNumber):
     print("Genetic Algorithm")
     state_current = weights
     initialPopulation = []
     print("Initial score")
     #print(self.run_episode(state_current))
+    #USAR DISTANCIA EUCLIDIANA PARA CALCULAR fitness
+    #dist = numpy.linalg.norm(a-b)
 
     numpy.random.seed(theSeed)
     initialPopulation = numpy.random.uniform(-10,10,(numberOfCandidates,len(state_current)))
@@ -20,12 +22,12 @@ def geneticAlgorithm(self, weights, numberOfCandidates, theSeed):
             initialPopulation[i][j]+=state_current[j]
 
 
-    iterator = 10
+    iterator = theIterationNumber
     while(iterator > 0):
         finalDescendants = []
         fitness = []
         for i in initialPopulation:
-            fitness.append(self.run_episode(i))
+            fitness.append(i[2])
 
         chosenPopulation = self.tournamentChoice(initialPopulation, fitness, numberOfCandidates/2)
         descendants = self.matching(chosenPopulation,numberOfCandidates/2)
@@ -145,6 +147,7 @@ if sys.version_info[0] < 3:
 
 def main(args):
     filename = (args.file[0].name)
+    popSize = (args.population)
     seed = (args.seed)
     shouldMeasureTime = (args.time)
 
@@ -167,26 +170,31 @@ def main(args):
 
     print("forest")
     pprint(forest)
+    self.geneticAlgorithm(forest,popSize,seed,shouldMeasureTime)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description='Uses Genetic Algorithm to find solution for MDGP.',
-        usage='MGDP.py [-h] [--file myinstance.txt] [--seed 1234ABCD] [--time n]')
+        usage='MGDP.py [-h] [--file myinstance.txt] [--population n] [--seed 1234ABCD] [--time n]')
 
     parser.add_argument('-f', '--file', type=open, nargs=1,
                         help='a file containing the instance',
                         required=True)
+    parser.add_argument(
+        '-p', '--population',type=int, help='Population Size')
 
     parser.add_argument(
-        '-s', '--seed', type=str, nargs=1, help='Seed to generate random numbers')
+        '-s', '--seed', type=int, help='Seed to generate random numbers')
 
     parser.add_argument(
-        '-t', '--time', action='store_true', help='Measure and print mean execution time')
+        '-t', '--time',type=int, help='Measure and print mean execution time')
     # argumento é o numero de vezes que o algoritmo deve ser rodado
+
 
     args = parser.parse_args()
     print(args.file[0].name)
+    print(args.population)
     print(args.seed)
     print(args.time)
 
