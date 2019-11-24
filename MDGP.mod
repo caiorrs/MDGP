@@ -44,7 +44,7 @@ var x {i in INDIVIDUALS, g in GROUPS} binary;
 
 # @alberto Ajustei a expressão para simplificar e usar o difference.
 #maximize diversity: sum{g in GROUPS} sum{i in INDIVIDUALS} sum{j in INDIVIDUALS} d[i,j] * (if i != j then y[i,j,g] else 1);
-maximize diversity: (sum{g in GROUPS} sum{i in INDIVIDUALS, j in INDIVIDUALS: i != j} difference[i,j] * y[i,j,g])/2;
+maximize diversity: (sum{g in GROUPS} sum{i in INDIVIDUALS, j in INDIVIDUALS: j > i} difference[i,j] * y[i,j,g]);
 
 # @alberto O uso de GROUPS e INDIVIDUALS está trocado em algumas restrições.
 
