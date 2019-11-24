@@ -19,21 +19,14 @@ set ARCS within(INDIVIDUALS cross INDIVIDUALS);
 param difference{ARCS};
 
 var d{(i,j) in ARCS} >= 0;
-var y{(i,j) in ARCS, g in GROUPS};
+/*var y{(i,j) in ARCS, g in GROUPS};*/
+var x{}
 
-param g := 1;
+maximize diversity: sum{g in GROUPS} sum{i in 1..(M-1)} sum{j in (i+1)..M} d[i,j]*x[i,g]*x[j,g];
 
-maximize diversity: /*sum{g in G}*/ sum{i in INDIVIDUALS} sum{j in INDIVIDUALS} /*d[i,j]*y[i,j,1]*/ 1;
-
-/*s.t. A: sum{g in G} d[i,g] = 1;*/
-s.t. B: sum{i in INDIVIDUALS} d[i,g] >= LIMITS /*a[g]*/;
-s.t. B: sum{i in INDIVIDUALS} d[i,g] <= LIMITS /*b[g] */;
-s.t. B: d[i,g] + d[j,g] - 1 <= y[i,j,g];
-s.t. B: sum{j in INDIVIDUALS and i <> j} y[i,j,g] >= (LIMITS /*a[g]*/ - 1) * d[j,g];
-s.t. B: sum{j in INDIVIDUALS and i <> j} y[i,j,g] <= (LIMITS /*b[g]*/ - 1) * d[j,g];
-s.t. B: d[i,g] >= 0;
-s.t. B: d[i,g] <= 1;
-s.t. B: y[i,j,g] >= 0;
-s.t. B: y[i,j,g] <= 1;
+s.t. sum{g in G, i in INDIVIDUALS} x[i,g] = 1;
+s.t. sum{i in M} x[i,g] >= LIMITS /*a[g]*/;
+s.t. sum{i in M>} x[i,g] <= LIMITS /*b[g] */;
+s.t. x[i,g] in {0, 1};
 
 end;
