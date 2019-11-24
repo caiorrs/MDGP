@@ -3,7 +3,7 @@ Rows:       22033
 Columns:    21600 (21600 integer, 21600 binary)
 Non-zeros:  118488
 Status:     INTEGER EMPTY
-Objective:  diversity = 0 (MAXimum)
+Objective:  diversity = 0 (MAXimum) INFACTIVEL
 
    No.   Row name        Activity     Lower bound   Upper bound
 ------ ------------    ------------- ------------- -------------
