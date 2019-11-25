@@ -55,14 +55,19 @@ def geneticAlgorithm( entry, numberOfCandidates, numberOfGroups, theSeed, theIte
         iterator-=1
 
     fitness = []
-    for i in finalDescendants:
-        fitness.append(i[2])
+    for i in initialPopulation:
+        fitValue = 0
+        for j in i:
+            fitValue+=j[2]
+        fitness.append(fitValue)
+    print("ESSE E O FITNESS 2")
+    print(fitness)
     maxValue = max(fitness)
     for i in range(len(fitness)):
         if(maxValue == fitness[i]):
             bestChoice = i
     print("Final score")
-    #print(self.run_episode(finalDescendants[bestChoice]))
+    print(max(fitness))
     return finalDescendants[bestChoice]
 
 
