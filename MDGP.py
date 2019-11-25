@@ -6,61 +6,85 @@ import random
 import time
 import math
 
+
+
+def getFitness(vertexes,weights):
+    fitness = 0
+    for i in range(len(vertexes)):
+        for j in range(i + 1, len(vertexes)):
+            for k in weights:
+                if((vertexes[i] == k[0] and vertexes[j] == k[1]) or (vertexes[i] == k[1] and vertexes[j] == k[0])):
+                    fitness+=k[2]
+    return fitness
+
+def getExcludedValues(vertexes,chosenValues):
+    excludedValues = []
+    for i in vertexes:
+        count = 0
+        for j in chosenValues:
+            for k in j:
+                if(i == k):
+                    count+=1
+        if(count == 0):
+            excludedValues.append(i)
+    return excludedValues
+
+
 def chunks(l, n):
     for i in range(0, len(l), n):
         yield l[i:i+n]
 
-def geneticAlgorithm( entry, numberOfCandidates, numberOfGroups, theSeed, theIterationNumber):
+def geneticAlgorithm( weights,vertexes, numberOfCandidates,numberOfGroups, theSeed, theIterationNumber):
     print("Genetic Algorithm")
-    state_current = entry
-    initialPopulation = state_current
+    state_current = weights
+    vertexList = list(range(0, vertexes))
+    initialPopulation = []
 
-    #USAR DISTANCIA EUCLIDIANA PARA CALCULAR fitness?
-    #dist = numpy.linalg.norm(a-b)
-    individualsPerGroup = numberOfCandidates * numberOfGroups
-    print(individualsPerGroup)
+
     numpy.random.seed(theSeed)
-    numpy.random.shuffle(initialPopulation)
-    #initialPopulation = numpy.array_split(initialPopulation,individualsPerGroup)
-    initialPopulation = list(chunks(initialPopulation, individualsPerGroup))
+    numpy.random.shuffle(vertexList)
+    initialPopulation = list(chunks(vertexList, numberOfCandidates))
     print("POP INICIAL")
     print(initialPopulation)
-
 
 
     iterator = theIterationNumber
     while(iterator > 0):
         finalDescendants = []
         fitness = []
+        fitnessValue = 0
+        excludedValues = []
         for i in initialPopulation:
-            fitValue = 0
-            for j in i:
-                fitValue+=j[2]
-            fitness.append(fitValue)
+            fitness.append(getFitness(i,state_current))
         print("ESSE E O FITNESS")
+        for i in range(numberOfGroups):
+            fitnessValue+=max(fitness)
         print(fitness)
 
-        chosenPopulation = tournamentChoice(initialPopulation, fitness, numberOfCandidates/2)
-        descendants = matching(chosenPopulation,numberOfCandidates/2)
-
+        chosenPopulation = theChoice(initialPopulation, numberOfCandidates)
+        print("CHOSEN POP")
+        print(chosenPopulation)
+        excludedValues = getExcludedValues(vertexList,chosenPopulation)
+        descendants = matching(chosenPopulation)
+        print("DESCENDANTS")
+        descendants = numpy.array_split(descendants,numberOfGroups)
+        print(descendants)
         finalDescendants = mutateGenes(descendants)
-        initialPopulation = finalDescendants
-        maxValue = max(fitness)
-        for i in range(len(fitness)):
-            if(maxValue == fitness[i]):
+        groupFit = numpy.zeros(len(finalDescendants))
+        for i in range(len(finalDescendants)):
+            for j in range(len(finalDescendants[i])):
+                groupFit[i] += (getFitness(finalDescendants[i][j],state_current))
+        maxValue = max(groupFit)
+        for i in range(len(groupFit)):
+            if(maxValue == groupFit[i]):
                 bestChoice = i
-
-        #print("Mid score")
-        #print(self.run_episode(finalDescendants[bestChoice]))
+        initialPopulation = finalDescendants[i]
         iterator-=1
 
     fitness = []
     for i in initialPopulation:
-        fitValue = 0
-        for j in i:
-            fitValue+=j[2]
-        fitness.append(fitValue)
-    print("ESSE E O FITNESS 2")
+        fitness.append(getFitness(i,state_current))
+    print("ESSE E O FITNESS FINAL")
     print(fitness)
     maxValue = max(fitness)
     for i in range(len(fitness)):
@@ -68,35 +92,23 @@ def geneticAlgorithm( entry, numberOfCandidates, numberOfGroups, theSeed, theIte
             bestChoice = i
     print("Final score")
     print(max(fitness))
-    return finalDescendants[bestChoice]
+    #return finalDescendants[bestChoice]
 
 
-def mutateGenes( candidates):
+def mutateGenes(candidates):
     for i in range(len(candidates)):
-        for j in range(len(candidates[i])):
-            if(numpy.random.randint(100) == 1):
-                candidates[i][j] += numpy.random.uniform(-0.5,0.5)
+        if(numpy.random.randint(10) == 1):
+            print("mutation")
+            #ALTERAR MUTACAO
+            #candidates[i][2] += numpy.random.uniform(-0.5,0.5)
 
     return candidates
 
-def matching( chosen, numberOfParts):
-    parts = []
-    dividedParts = []
-    parts = numpy.array_split(chosen,numberOfParts)
-    limit = int(numberOfParts)
-    indexes = list(range(0,limit))
-    for i in range(limit):
-        value = numpy.random.choice(indexes)
-        dividedParts.append(parts[value])
-        indexes.remove(value)
-
-    dplimit = len(dividedParts)
+def matching( chosen):
     descendants = []
-    for i in range(0,limit,2):
-        if ((dplimit - i) == 1):
-            descendants.extend( crossover(dividedParts[i],dividedParts[i]))
-        else:
-            descendants.extend( crossover(dividedParts[i],dividedParts[i+1]))
+    for i in range(len(chosen)):
+        if(i+1 < len(chosen)):
+            descendants.extend( crossover(chosen[i],chosen[i+1]))
     return descendants
 
 def crossover( candidate1, candidate2):
@@ -128,33 +140,11 @@ def crossover( candidate1, candidate2):
 
     return finalArray
 
-def tournamentChoice( candidates, fitness, limit):
-    localFitness = fitness
+def theChoice( candidates, limit):
     chosenOnes=[]
-    round=0
-    while(round<limit):
-
-        combatant0 = numpy.random.randint(0,len(fitness))
-        fitness0 = fitness[combatant0]
-        combatant1 = numpy.random.randint(0,len(fitness))
-        fitness1 = fitness[combatant1]
-        combatant2 = numpy.random.randint(0,len(fitness))
-        fitness2 = fitness[combatant2]
-        combatant3 = numpy.random.randint(0,len(fitness))
-        fitness3 = fitness[combatant3]
-        chosenFitness = max(fitness0,fitness1,fitness2,fitness3)
-
-
-        if (chosenFitness == fitness0):
-            chosenOnes.extend(candidates[combatant0])
-        elif (chosenFitness == fitness1):
-            chosenOnes.extend( candidates[combatant1])
-        elif (chosenFitness == fitness2):
-            chosenOnes.extend(candidates[combatant2])
-        elif (chosenFitness == fitness3):
-            chosenOnes.extend(candidates[combatant3])
-        round+=1
-
+    for i in candidates:
+        if (len(i) == limit):
+            chosenOnes.append(i)
     return chosenOnes
 
 if sys.version_info[0] < 3:
@@ -164,7 +154,7 @@ if sys.version_info[0] < 3:
 def main(args):
     filename = (args.file[0].name)
     popSize = (args.population)
-    groupsNum = (args.groups)
+    groups = (args.groups)
     seed = (args.seed)
     shouldMeasureTime = (args.time)
 
@@ -187,11 +177,11 @@ def main(args):
 
     print("forest")
     pprint(forest)
-    if(popSize * groupsNum > int(M)):
-        print("Valor de indivíduos ou grupos inválido")
+    if(popSize * groups > int(M)):
+        print("Valor de indivíduos maior que o permitido")
         quit()
 
-    geneticAlgorithm(forest,popSize,groupsNum,seed,shouldMeasureTime)
+    geneticAlgorithm(forest,int(M),popSize,groups,seed,shouldMeasureTime)
 
 
 if __name__ == "__main__":
@@ -204,9 +194,9 @@ if __name__ == "__main__":
                         required=True)
     parser.add_argument(
         '-p', '--population',type=int, help='Population Size')
-
     parser.add_argument(
-        '-g', '--groups',type=int, help='Number of groups')
+        '-g', '--groups',type=int, help='Group Size')
+
     parser.add_argument(
         '-s', '--seed', type=int, help='Seed to generate random numbers')
 
