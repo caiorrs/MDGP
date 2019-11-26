@@ -40,7 +40,7 @@ def geneticAlgorithm( weights,vertexes, numberOfCandidates,numberOfGroups, theSe
     vertexList = list(range(0, vertexes))
     initialPopulation = []
 
-
+    #numpy.random.seed(int(time.time()))
     numpy.random.seed(theSeed)
     numpy.random.shuffle(vertexList)
     initialPopulation = list(chunks(vertexList, numberOfCandidates))
@@ -52,37 +52,42 @@ def geneticAlgorithm( weights,vertexes, numberOfCandidates,numberOfGroups, theSe
     while(iterator > 0):
         finalDescendants = []
         fitness = []
-        fitnessValue = 0
         excludedValues = []
-        for i in initialPopulation:
-            fitness.append(getFitness(i,state_current))
-        print("ESSE E O FITNESS")
-        for i in range(numberOfGroups):
-            fitnessValue+=max(fitness)
-        print(fitness)
 
         chosenPopulation = theChoice(initialPopulation, numberOfCandidates)
-        print("CHOSEN POP")
-        print(chosenPopulation)
         excludedValues = getExcludedValues(vertexList,chosenPopulation)
+        for i in chosenPopulation:
+            fitness.append(getFitness(i,state_current))
+
         descendants = matching(chosenPopulation)
-        print("DESCENDANTS")
         descendants = numpy.array_split(descendants,numberOfGroups)
-        print(descendants)
-        finalDescendants = mutateGenes(descendants)
+        if(excludedValues):
+            finalDescendants, excludedValues = mutateGenes(descendants, excludedValues)
+        else:
+            finalDescendants = descendants
+
         groupFit = numpy.zeros(len(finalDescendants))
         for i in range(len(finalDescendants)):
             for j in range(len(finalDescendants[i])):
                 groupFit[i] += (getFitness(finalDescendants[i][j],state_current))
-        maxValue = max(groupFit)
-        for i in range(len(groupFit)):
-            if(maxValue == groupFit[i]):
-                bestChoice = i
-        initialPopulation = finalDescendants[i]
+        maxIndex = numpy.argpartition(groupFit, -1)[-1:]
+        finalDescendants = finalDescendants[maxIndex[0]]
+        fitness = []
+        for i in finalDescendants:
+            fitness.append(getFitness(i,state_current))
+        print("Mid pop")
+        print(finalDescendants)
+        print("Mid score")
+        print(sum(fitness))
+        initialPopulation = finalDescendants
+        initialPopulation = numpy.append(initialPopulation,excludedValues)
+        initialPopulation = list(chunks(initialPopulation, numberOfCandidates))
         iterator-=1
 
+    print("POP FINAL")
+    print(finalDescendants)
     fitness = []
-    for i in initialPopulation:
+    for i in finalDescendants:
         fitness.append(getFitness(i,state_current))
     print("ESSE E O FITNESS FINAL")
     print(fitness)
@@ -91,18 +96,19 @@ def geneticAlgorithm( weights,vertexes, numberOfCandidates,numberOfGroups, theSe
         if(maxValue == fitness[i]):
             bestChoice = i
     print("Final score")
-    print(max(fitness))
+    print(sum(fitness))
     #return finalDescendants[bestChoice]
 
 
-def mutateGenes(candidates):
-    for i in range(len(candidates)):
-        if(numpy.random.randint(10) == 1):
-            print("mutation")
-            #ALTERAR MUTACAO
-            #candidates[i][2] += numpy.random.uniform(-0.5,0.5)
+def mutateGenes(candidates, excluded):
+    if(numpy.random.randint(10) == 1):
+        indSon = numpy.random.randint(0,len(candidates))
+        indGroup = numpy.random.randint(0,len(candidates[indSon]))
+        indValue = numpy.random.randint(0,len(candidates[indSon][indGroup]))
+        indExc = numpy.random.randint(0,len(excluded))
+        candidates[indSon][indGroup][indValue],excluded[indExc] = excluded[indExc],candidates[indSon][indGroup][indValue]
 
-    return candidates
+    return candidates, excluded
 
 def matching( chosen):
     descendants = []
@@ -112,6 +118,8 @@ def matching( chosen):
     return descendants
 
 def crossover( candidate1, candidate2):
+    numpy.random.shuffle(candidate1)
+    numpy.random.shuffle(candidate2)
     c1 = numpy.array_split(candidate1,2)
     c2 = numpy.array_split(candidate2,2)
     c3 = numpy.array_split(candidate1,4)
@@ -175,8 +183,8 @@ def main(args):
             e1, e2, d = int(e1), int(e2), float(d)
             forest.append([e1, e2, d])
 
-    print("forest")
-    pprint(forest)
+    #print("forest")
+    #pprint(forest)
     if(popSize * groups > int(M)):
         print("Valor de indivíduos maior que o permitido")
         quit()
