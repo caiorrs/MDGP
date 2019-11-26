@@ -42,6 +42,7 @@ def geneticAlgorithm( weights,vertexes, numberOfCandidates,numberOfGroups, theSe
     biggestValue = 0
     biggestPop = []
     biggestIt = 0
+    bestTime = 0
     #numpy.random.seed(int(time.time()))
     numpy.random.seed(theSeed)
     numpy.random.shuffle(vertexList)
@@ -95,6 +96,7 @@ def geneticAlgorithm( weights,vertexes, numberOfCandidates,numberOfGroups, theSe
             biggestValue = sum(fitness)
             biggestPop = finalDescendants
             biggestIt = theIterationNumber - iterator + 1
+            bestTime = time.perf_counter_ns()
         initialPopulation = finalDescendants
         initialPopulation = numpy.append(initialPopulation,excludedValues)
         initialPopulation = list(chunks(initialPopulation, numberOfCandidates))
@@ -118,6 +120,8 @@ def geneticAlgorithm( weights,vertexes, numberOfCandidates,numberOfGroups, theSe
     print(biggestValue)
     print("Iteration")
     print(biggestIt)
+    print("best time")
+    print(bestTime)
     #return finalDescendants[bestChoice]
 
 
@@ -194,10 +198,10 @@ if sys.version_info[0] < 3:
 
 def main(args):
     filename = (args.file[0].name)
-    popSize = (args.population)
-    groups = (args.groups)
+    #popSize = (args.population)
+    #groups = (args.groups)
     seed = (args.seed)
-    shouldMeasureTime = (args.time)
+    cycles = (args.epochs)
 
     forest = []
 
@@ -222,11 +226,11 @@ def main(args):
     b = limits[1::2]
     #print(a)
     #print(b)
-    if(popSize * groups > int(M)):
-        print("Valor de indivíduos maior que o permitido")
-        quit()
+    #if(popSize * groups > int(M)):
+    #    print("Valor de indivíduos maior que o permitido")
+    #    quit()
     start = time.perf_counter_ns()
-    geneticAlgorithm(forest,int(M),popSize,groups,seed,shouldMeasureTime)
+    geneticAlgorithm(forest,int(M),int(int(M)/int(G)),int(G),seed,cycles)
     end = time.perf_counter_ns()
     print("EXECUTION TIME")
     print(end - start)
@@ -235,29 +239,29 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description='Uses Genetic Algorithm to find solution for MDGP.',
-        usage='MGDP.py [-h] [--file myinstance.txt] [--population n] [--groups n] [--seed 1234ABCD] [--time n]')
+        usage='MGDP.py [-h] [--file myinstance.txt] [--seed 1234ABCD] [--epochs n]')
 
     parser.add_argument('-f', '--file', type=open, nargs=1,
                         help='a file containing the instance',
                         required=True)
-    parser.add_argument(
-        '-p', '--population',type=int, help='Population Size')
-    parser.add_argument(
-        '-g', '--groups',type=int, help='Group Size')
+    #parser.add_argument(
+    #    '-p', '--population',type=int, help='Population Size')
+    #parser.add_argument(
+    #    '-g', '--groups',type=int, help='Group Size')
 
     parser.add_argument(
         '-s', '--seed', type=int, help='Seed to generate random numbers')
 
     parser.add_argument(
-        '-t', '--time',type=int, help='Measure and print mean execution time')
+        '-e', '--epochs',type=int, help='Number of execution cycles')
     # argumento é o numero de vezes que o algoritmo deve ser rodado
 
 
     args = parser.parse_args()
     print(args.file[0].name)
-    print(args.population)
-    print(args.groups)
+    #print(args.population)
+    #print(args.groups)
     print(args.seed)
-    print(args.time)
+    print(args.epochs)
 
     main(args)
