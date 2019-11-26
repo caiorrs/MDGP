@@ -22,6 +22,10 @@ var x {i in INDIVIDUALS, g in GROUPS} binary;
 
 maximize diversity: (sum{g in GROUPS} sum{i in INDIVIDUALS, j in INDIVIDUALS: i != j} difference[i,j] * y[i,j,g])/2;
 
+# como rodar, ex
+# glpsol -m mdgp_arrumado.mod -d Geo_n060_ss_04.dat -o Geo3.txt --tmlim 3600 --log logGeo3.txt
+# decidi nomear Geo1, Geo2, Geo3, RanInt1, ... , RanReal1... na saida pra facilitar
+# log guarda a saida do terminal em um arquivo - precisamos por causa do tempo
 
 s.t. W1{i in INDIVIDUALS} : sum {g in GROUPS} x[i,g] = 1;
 
