@@ -39,7 +39,9 @@ def geneticAlgorithm( weights,vertexes, numberOfCandidates,numberOfGroups, theSe
     state_current = weights
     vertexList = list(range(0, vertexes))
     initialPopulation = []
-
+    biggestValue = 0
+    biggestPop = []
+    biggestIt = 0
     #numpy.random.seed(int(time.time()))
     numpy.random.seed(theSeed)
     numpy.random.shuffle(vertexList)
@@ -83,28 +85,37 @@ def geneticAlgorithm( weights,vertexes, numberOfCandidates,numberOfGroups, theSe
         fitness = []
         for i in finalDescendants:
             fitness.append(getFitness(i,state_current))
-        print("Mid pop")
-        print(finalDescendants)
-        print("Mid score")
-        print(sum(fitness))
+        #print("Mid pop")
+        #print(finalDescendants)
+        #print("Mid score")
+        #print(sum(fitness))
+        if(sum(fitness)> biggestValue):
+            biggestValue = sum(fitness)
+            biggestPop = finalDescendants
+            biggestIt = theIterationNumber - iterator + 1
         initialPopulation = finalDescendants
         initialPopulation = numpy.append(initialPopulation,excludedValues)
         initialPopulation = list(chunks(initialPopulation, numberOfCandidates))
         iterator-=1
 
+    #print("POP FINAL")
+    #print(finalDescendants)
+    #fitness = []
+    #for i in finalDescendants:
+    #    fitness.append(getFitness(i,state_current))
+    #print("ESSE E O FITNESS FINAL")
+    #print(fitness)
+    #maxValue = max(fitness)
+    #for i in range(len(fitness)):
+    #    if(maxValue == fitness[i]):
+    #        bestChoice = i
     print("POP FINAL")
-    print(finalDescendants)
-    fitness = []
-    for i in finalDescendants:
-        fitness.append(getFitness(i,state_current))
-    print("ESSE E O FITNESS FINAL")
-    print(fitness)
-    maxValue = max(fitness)
-    for i in range(len(fitness)):
-        if(maxValue == fitness[i]):
-            bestChoice = i
+    print(biggestPop)
     print("Final score")
-    print(sum(fitness))
+    #print(sum(fitness))
+    print(biggestValue)
+    print("Iteration")
+    print(biggestIt)
     #return finalDescendants[bestChoice]
 
 
