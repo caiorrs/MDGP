@@ -45,6 +45,7 @@ def geneticAlgorithm( weights,vertexes, numberOfCandidates,numberOfGroups, theSe
     #numpy.random.seed(int(time.time()))
     numpy.random.seed(theSeed)
     numpy.random.shuffle(vertexList)
+    #initialPopulation = numpy.array_split(vertexList,numberOfGroups)
     initialPopulation = list(chunks(vertexList, numberOfCandidates))
     print("POP INICIAL")
     print(initialPopulation)
@@ -61,11 +62,12 @@ def geneticAlgorithm( weights,vertexes, numberOfCandidates,numberOfGroups, theSe
         fitness = numpy.zeros(len(chosenPopulation))
         for i in range(len(chosenPopulation)):
                 fitness[i] += (getFitness(chosenPopulation[i],state_current))
-
+        #print("b4 match")
+        #print(chosenPopulation)
         descendants = matching(chosenPopulation)
         descendants = numpy.array_split(descendants,numberOfGroups)
         #print("DESC")
-        #print(descendants)
+        #print(excludedValues)
         if(excludedValues):
             finalDescendants, excludedValues = mutateGenesWithExcluded(descendants, excludedValues)
         else:
@@ -139,7 +141,7 @@ def mutateGenes(candidates):
 
 def matching( chosen):
     descendants = []
-    for i in range(len(chosen)):
+    for i in range(0,len(chosen),2):
         if(i+1 < len(chosen)):
             descendants.extend( crossover(chosen[i],chosen[i+1]))
     return descendants
@@ -215,12 +217,19 @@ def main(args):
             forest.append([e1, e2, d])
 
     #print("forest")
-    #pprint(forest)
+    pprint(forest)
+    a = limits[::2]
+    b = limits[1::2]
+    #print(a)
+    #print(b)
     if(popSize * groups > int(M)):
         print("Valor de indivíduos maior que o permitido")
         quit()
-
+    start = time.perf_counter_ns()
     geneticAlgorithm(forest,int(M),popSize,groups,seed,shouldMeasureTime)
+    end = time.perf_counter_ns()
+    print("EXECUTION TIME")
+    print(end - start)
 
 
 if __name__ == "__main__":
