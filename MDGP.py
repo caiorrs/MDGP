@@ -56,21 +56,29 @@ def geneticAlgorithm( weights,vertexes, numberOfCandidates,numberOfGroups, theSe
 
         chosenPopulation = theChoice(initialPopulation, numberOfCandidates)
         excludedValues = getExcludedValues(vertexList,chosenPopulation)
-        for i in chosenPopulation:
-            fitness.append(getFitness(i,state_current))
+        fitness = numpy.zeros(len(chosenPopulation))
+        for i in range(len(chosenPopulation)):
+                fitness[i] += (getFitness(chosenPopulation[i],state_current))
 
         descendants = matching(chosenPopulation)
         descendants = numpy.array_split(descendants,numberOfGroups)
+        #print("DESC")
+        #print(descendants)
         if(excludedValues):
-            finalDescendants, excludedValues = mutateGenes(descendants, excludedValues)
+            finalDescendants, excludedValues = mutateGenesWithExcluded(descendants, excludedValues)
         else:
             finalDescendants = descendants
+            #finalDescendants = mutateGenes(descendants)
 
         groupFit = numpy.zeros(len(finalDescendants))
         for i in range(len(finalDescendants)):
             for j in range(len(finalDescendants[i])):
                 groupFit[i] += (getFitness(finalDescendants[i][j],state_current))
         maxIndex = numpy.argpartition(groupFit, -1)[-1:]
+        #if(groupFit[maxIndex[0]] > sum(fitness)):
+        #    finalDescendants = finalDescendants[maxIndex[0]]
+        #else:
+        #    finalDescendants = chosenPopulation
         finalDescendants = finalDescendants[maxIndex[0]]
         fitness = []
         for i in finalDescendants:
@@ -100,7 +108,7 @@ def geneticAlgorithm( weights,vertexes, numberOfCandidates,numberOfGroups, theSe
     #return finalDescendants[bestChoice]
 
 
-def mutateGenes(candidates, excluded):
+def mutateGenesWithExcluded(candidates, excluded):
     if(numpy.random.randint(10) == 1):
         indSon = numpy.random.randint(0,len(candidates))
         indGroup = numpy.random.randint(0,len(candidates[indSon]))
@@ -109,6 +117,14 @@ def mutateGenes(candidates, excluded):
         candidates[indSon][indGroup][indValue],excluded[indExc] = excluded[indExc],candidates[indSon][indGroup][indValue]
 
     return candidates, excluded
+
+def mutateGenes(candidates):
+    if(numpy.random.randint(10) == 1):
+        indCand1 = numpy.random.randint(0,len(candidates[0]))
+        indCand2 = numpy.random.randint(0,len(candidates[1]))
+        candidates[0][indCand1],candidates[1][indCand2] = candidates[1][indCand2] ,candidates[0][indCand1]
+
+    return candidates
 
 def matching( chosen):
     descendants = []
@@ -120,6 +136,8 @@ def matching( chosen):
 def crossover( candidate1, candidate2):
     numpy.random.shuffle(candidate1)
     numpy.random.shuffle(candidate2)
+    #can1 = candidate1
+    #can2 = candidate2
     c1 = numpy.array_split(candidate1,2)
     c2 = numpy.array_split(candidate2,2)
     c3 = numpy.array_split(candidate1,4)
@@ -145,6 +163,8 @@ def crossover( candidate1, candidate2):
     finalArray.append(child2)
     finalArray.append(child3)
     finalArray.append(child4)
+    #finalArray.append(can1)
+    #finalArray.append(can2)
 
     return finalArray
 
